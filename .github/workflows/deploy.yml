@@ -53,8 +53,8 @@ jobs:
           fi
 
           echo "✅ 开始部署前端..."
-          # 使用 -e 指定环境ID（最稳定）
-          tcb hosting deploy ./frontend /             -e ${{ secrets.TCB_ENV_ID }}             --yes
+          # 只使用长参数名
+          tcb hosting deploy ./frontend /             --env-id ${{ secrets.TCB_ENV_ID }}             --yes
         env:
           TCB_SECRET_ID: ${{ secrets.TCB_SECRET_ID }}
           TCB_SECRET_KEY: ${{ secrets.TCB_SECRET_KEY }}
@@ -103,12 +103,8 @@ jobs:
           cd backend
           echo "=== 部署后端 ==="
 
-          # 使用 -e 指定环境ID，避免 --envId 弃用问题
-          # 使用完整参数名，避免简写冲突
-          tcb run deploy             -e ${{ secrets.TCB_ENV_ID }}             --service-name material-api             --container-port 8080             --path .             --cpu 0.25             --mem 0.5             --min-num 1             --max-num 5             --yes || {
-              echo "尝试备用命令格式..."
-              tcb run deploy                 -e ${{ secrets.TCB_ENV_ID }}                 --service-name material-api                 --path .                 --yes
-            }
+          # 只使用长参数名，完全避免简写
+          tcb run deploy             --env-id ${{ secrets.TCB_ENV_ID }}             --service-name material-api             --container-port 8080             --path .             --cpu 0.25             --mem 0.5             --min-num 1             --max-num 5             --yes
         env:
           TCB_SECRET_ID: ${{ secrets.TCB_SECRET_ID }}
           TCB_SECRET_KEY: ${{ secrets.TCB_SECRET_KEY }}
