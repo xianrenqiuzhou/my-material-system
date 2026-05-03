@@ -102,9 +102,10 @@ jobs:
           cd backend
           echo "=== 部署后端 ==="
 
-          # 使用 tcb run service:create 创建服务（CLI 3.2.2 支持）
-          # 参考: https://cloud.tencent.com/document/product/1243/76108
-          tcb run service:create             -e ${{ secrets.TCB_ENV_ID }}             -s material-api             --containerPort 8080             --path .             --cpu 0.25             --mem 0.5             --minNum 1             --maxNum 5             --yes
+          # 使用 tcb run deploy 命令（CLI 3.2.2 支持）
+          # 参考官方文档: https://cloud.tencent.com/document/product/1243/76108
+          # 必须使用 -e 和 -s 简写参数
+          tcb run deploy             -e ${{ secrets.TCB_ENV_ID }}             -s material-api             --containerPort 8080             --path .             --cpu 0.25             --mem 0.5             --minNum 1             --maxNum 5             --yes
         env:
           TCB_SECRET_ID: ${{ secrets.TCB_SECRET_ID }}
           TCB_SECRET_KEY: ${{ secrets.TCB_SECRET_KEY }}
