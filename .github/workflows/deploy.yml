@@ -1,78 +1,27 @@
-name: Deploy to CloudBase
+name: Deploy to CloudBase Static Hosting
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
-  deploy-frontend:
-    name: Deploy Frontend
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-      - name: Check files
-        run: |
-          echo "=== 检查文件结构 ==="
-          ls -la
-          ls -la frontend/ 2>/dev/null || echo "❌ frontend 目录不存在!"
+          node-version: '18'
 
       - name: Install CloudBase CLI
-        run: |
-          npm install -g @cloudbase/cli@latest
-          tcb --version
+        run: npm install -g @cloudbase/cli
 
       - name: Login to CloudBase
-        run: |
-          tcb login --apiKeyId "${{ secrets.TCB_SECRET_ID }}" --apiKey "${{ secrets.TCB_SECRET_KEY }}"
+        run: tcb login --apiKeyId ${{ secrets.TCB_SECRET_ID }} --apiKey ${{ secrets.TCB_SECRET_KEY }}
 
-      - name: Deploy Frontend
-        run: |
-          if [ ! -d "frontend" ]; then
-            echo "❌ frontend 目录不存在!"
-            exit 1
-          fi
-          if [ ! -f "frontend/index.html" ]; then
-            echo "❌ frontend/index.html 不存在!"
-            exit 1
-          fi
-
-          echo "✅ 开始部署前端..."
-          tcb hosting deploy ./frontend / -e ${{ secrets.TCB_ENV_ID }} --yes
-        env:
-          TCB_SECRET_ID: ${{ secrets.TCB_SECRET_ID }}
-          TCB_SECRET_KEY: ${{ secrets.TCB_SECRET_KEY }}
-
-  summary:
-    name: Summary
-    runs-on: ubuntu-latest
-    needs: [deploy-frontend]
-    if: always()
-
-    steps:
-      - name: Results
-        run: |
-          echo "=========================================="
-          echo "🎉 部署流程执行完毕"
-          echo ""
-          echo "结果汇总:"
-          echo " 前端部署: ${{ needs.deploy-frontend.result }}"
-          echo ""
-          echo "访问地址:"
-          echo " 前端: https://material-system-d5f7ufn08b049d4c-1427907742.tcloudbaseapp.com"
-          echo "=========================================="
+      - name: Deploy to Static Hosting
+        run: tcb hosting deploy . / -e ${{ secrets.TCB_ENV_ID }}
